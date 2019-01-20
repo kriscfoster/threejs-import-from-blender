@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/100/three.js"></script>
+  <script src="./threejs-loader/OBJLoader.js"></script>
+  <script src="./threejs-loader/MTLLoader.js"></script>
+  <style type="text/css">
+    body {
+      margin: 0px;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    let cube;
+    const scene = new THREE.Scene();
+
+    const light = new THREE.DirectionalLight('#ffffff', 0.9);
+    light.position.set(-20, 0, 100);
+    scene.add(light);
+
+    const camera = new THREE.PerspectiveCamera(75,
+      window.innerWidth/window.innerHeight, 0.1, 1000);
+    camera.position.z = 5;
+
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    const objLoader = new THREE.OBJLoader();
+    objLoader.setPath('/blender-files/');
+
+    const mtlLoader = new THREE.MTLLoader();
+    mtlLoader.setPath('/blender-files/');
+
+    new Promise((resolve) => {
+      mtlLoader.load('cube.mtl', (materials) => {
+        resolve(materials);
+      });
+    })
+    .then((materials) => {
+      materials.preload();
+      objLoader.setMaterials(materials);
+      objLoader.load('cube.obj', (object) => {
+        cube = object;
+        scene.add(object);
+      });
+    });
+
+    function render() {
+      if (cube) {
+        cube.rotation.x += 0.01;
+        cube.rotation.y += 0.01;
+      }
+
+      requestAnimationFrame(render);
+      renderer.render(scene, camera);
+    }
+
+    render();
+  </script>
+</body>
+</html>
